@@ -1,14 +1,11 @@
 import os
-import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
 from flask import Flask
 import threading
 
-# YOUR BOT TOKEN
-TOKEN = "8799803261:AAH8APVt3nX_ZP6e1kBh5w27VDr_U8S8iyc"
-
-# YOUR GAME URL
+# YOUR NEW BOT TOKEN - HARDCODED
+TOKEN = "8695754535:AAF3WjpAdQmmRWXqubN6oSidYYGmQEdr_ek"
 GAME_URL = "https://infinitecoin-jumper-s59b.vercel.app"
 
 app = Flask(__name__)
