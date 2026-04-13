@@ -1,9 +1,9 @@
 import os
-import asyncio
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes
-from flask import Flask
 import threading
+import asyncio
 
 TOKEN = "8695754535:AAF3WjpAdQmmRWXqubN6oSidYYGmQEdr_ek"
 GAME_URL = "https://infinitecoin-jumper-s59b.vercel.app"
@@ -39,7 +39,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "📖 *GAME CONTROLS* 📖\n\n"
         "✦ JUMP: Tap ♾️ button or SPACE/UP arrow\n"
         "✦ DOUBLE JUMP: Tap again in air\n"
-        "✦ COLLECT: ♾️ IFC coins\n"
+        "✦ COLLECT: ♾️ IFC coins (5-100 IFC)\n"
         "✦ AVOID: Red viruses (-10% health) | Black viruses (-30% health)\n"
         "✦ GIFT BOX: +10,000 IFC\n"
         "✦ DAILY BONUS: +500 IFC every 24 hours",
@@ -54,24 +54,21 @@ async def wallet(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
 def run_bot():
-    # Use asyncio to run the bot
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     
-    bot_app = Application.builder().token(TOKEN).build()
-    bot_app.add_handler(CommandHandler("start", start))
-    bot_app.add_handler(CommandHandler("play", play))
-    bot_app.add_handler(CommandHandler("help", help_command))
-    bot_app.add_handler(CommandHandler("wallet", wallet))
+    application = Application.builder().token(TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("play", play))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("wallet", wallet))
     
-    loop.run_until_complete(bot_app.initialize())
-    loop.run_until_complete(bot_app.start())
-    loop.run_forever()
-
-def run_flask():
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    application.run_polling()
 
 if __name__ == "__main__":
+    # Run bot in background
     bot_thread = threading.Thread(target=run_bot)
     bot_thread.start()
-    run_flask()
+    
+    # Run Flask
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
