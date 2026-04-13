@@ -1,38 +1,51 @@
 import os
-from flask import Flask
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, ContextTypes
+import requests
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
 
 TOKEN = "8695754535:AAF3WjpAdQmmRWXqubN6oSidYYGmQEdr_ek"
 GAME_URL = "https://infinitecoin-jumper-s59b.vercel.app"
 
-app = Flask(__name__)
+API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
 @app.route('/')
 def health():
-    return "OK", 200
+    return "Bot is running", 200
 
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton("🎮 PLAY INFINITE JUMPER", web_app={"url": GAME_URL})]]
-    await update.message.reply_text(
-        "🚀 *INFINITE JUMPER* 🚀\n\nTap the button to play and earn IFC.",
-        reply_markup=InlineKeyboardMarkup(keyboard),
-        parse_mode="Markdown"
-    )
+@app.route(f'/webhook', methods=['POST'])
+def webhook():
+    data = request.get_json()
+    if data and 'message' in data:
+        chat_id = data['message']['chat']['id']
+        text = data['message'].get('text', '')
+        
+        if text == '/start':
+            send_start_message(chat_id)
+    
+    return jsonify({"status": "ok"}), 200
+
+def send_start_message(chat_id):
+    keyboard = {
+        "inline_keyboard": [[{
+            "text": "🎮 PLAY INFINITE JUMPER",
+            "web_app": {"url": GAME_URL}
+        }]]
+    }
+    payload = {
+        "chat_id": chat_id,
+        "text": "🚀 *INFINITE JUMPER* 🚀\n\nTap the button to play and earn IFC.",
+        "reply_markup": keyboard,
+        "parse_mode": "Markdown"
+    }
+    requests.post(f"{API_URL}/sendMessage", json=payload)
+
+def set_webhook():
+    webhook_url = f"https://infinitecoin-bot.onrender.com/webhook"
+    response = requests.post(f"{API_URL}/setWebhook", json={"url": webhook_url})
+    print("Webhook response:", response.json())
 
 if __name__ == "__main__":
-    # Start bot in background
-    import threading
-    import asyncio
-    
-    def run_bot():
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        bot = Application.builder().token(TOKEN).build()
-        bot.add_handler(CommandHandler("start", start))
-        bot.run_polling()
-    
-    threading.Thread(target=run_bot, daemon=True).start()
-    
-    # Start Flask
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    set_webhook()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
