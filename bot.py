@@ -5,7 +5,7 @@ from flask import Flask, request, jsonify
 app = Flask(__name__)
 
 TOKEN = "8695754535:AAF3WjpAdQmmRWXqubN6oSidYYGmQEdr_ek"
-GAME_URL = "GAME_URL = "https://infinitecoin-jumper-op7l.vercel.app"
+GAME_URL = "https://infinitecoin-jumper-op7l.vercel.app"
 
 API_URL = f"https://api.telegram.org/bot{TOKEN}"
 
